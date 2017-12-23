@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from constants import Log
+from constants import Log, Contant
 import codecs
 import re
 
@@ -75,5 +75,10 @@ class iOSStringsHandler:
                 if len(retvalue) > 1:
                     keys.append(retvalue[0].lstrip()[1:])
                     values.append(retvalue[1].rstrip().rstrip(' ;')[:-1])
+                else:          
+                    result = re.split(r'/\*.+\*/\n', line, maxsplit=1)
+                    if len(result) == 2:
+                        keys.append(Contant.KEY_DEV_COMMENT)
+                        values.append(line.strip())
 
         return keys,values
