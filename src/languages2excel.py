@@ -12,8 +12,7 @@ root_path = os.path.split(current_path)[0]
 sys.path.append(root_path)
 import pyExcelerator
 
-#Add command option
-def addParser():
+def _addParser():
     parser = OptionParser()
     parser.add_option("-s", "--sourceFolder",
                       dest="sourceFolder",
@@ -47,18 +46,18 @@ def _getCountryCode(foldername, apptype):
 def _getStandardKeyValuesListFrom(languageFolder, apptype):
     if apptype == 'ios':
         path = os.path.join(languageFolder, "en.lproj", 'Language.strings')
-        return iOSStringsHandler.getKeysAndValues(path)
+        return iOSStringsHandler.getKeysAndValuesByPath(path)
     else:
         path = os.path.join(languageFolder, "values", 'strings.xml')
-        return AndroidXmlHandler.getStandardKeysAndValues(path)
+        return AndroidXmlHandler.getKeysAndValuesByPath(path)
 
 def _getKeyValuesDictFrom(stringsFolder, apptype):
     if apptype == 'ios':
         path = os.path.join(stringsFolder, 'Language.strings')
-        return iOSStringsHandler.getKeysAndValues(path)
+        return iOSStringsHandler.getKeyValueDictByPath(path)
     else:
         path = os.path.join(stringsFolder, 'strings.xml')
-        return AndroidXmlHandler.getDict(path)
+        return AndroidXmlHandler.getKeyValueDictByPath(path)
 
 def startConvert(sourceFolder, xlsFolder, apptype):
     if sourceFolder is not None:
@@ -103,7 +102,7 @@ def startConvert(sourceFolder, xlsFolder, apptype):
 
 
 def main():
-    options = addParser()
+    options = _addParser()
     startConvert(options.sourceFolder, options.xlsFolder, options.apptype)
 
 if __name__=='__main__':

@@ -61,7 +61,7 @@ class AndroidXmlHandler:
         fo.close()
 
     @staticmethod
-    def getDict(path):
+    def getKeyValueDictByPath(path):
         if path is None:
             Log.error('file path is None')
             return
@@ -83,7 +83,7 @@ class AndroidXmlHandler:
         return languageDict
 
     @staticmethod
-    def getStandardKeysAndValues(path):
+    def getKeysAndValuesByPath(path):
         if path is None:
             Log.error('file path is None')
             return

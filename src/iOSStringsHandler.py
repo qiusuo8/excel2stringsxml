@@ -4,6 +4,7 @@
 import os
 from constants import Log
 import codecs
+import re
 
 class iOSStringsHandler:
 
@@ -31,31 +32,48 @@ class iOSStringsHandler:
 
         fo.close()
 
-
     @staticmethod
-    def getKeysAndValues(path):
+    def getKeyValueDictByPath(path):
         if path is None:
             Log.error('file path is None')
             return
+        Log.info('parse %s' % path)
 
-        # 1.Read localizable.strings
-        file = codecs.open(path, 'r', 'utf-8')
-        string = file.read()
-        file.close()
+        keyvalue = {}
+        file = codecs.open(path, mode='r', encoding='utf-8')
+        while True:
+            lines = file.readlines(sizehint=1000)
+            if not lines:
+                break
 
-        # 2.Split by ";
-        localStringList = string.split('\";')
-        list = [x.split(' = ') for x in localStringList]
+            for line in lines:
+                retvalue = re.split(r'"[ ]*=[ ]*"', line, maxsplit=1)
+                if len(retvalue) > 1:
+                    k = retvalue[0].lstrip()[1:]
+                    v = retvalue[1].rstrip().rstrip(' ;')[:-1]
+                    keyvalue[k] = v
 
-        # 3.Get keys & values
+        return keyvalue
+
+    @staticmethod
+    def getKeysAndValuesByPath(path):
+        if path is None:
+            Log.error('file path is None')
+            return
+        Log.info('parse %s' % path)
+
         keys = []
         values = []
-        for x in range(len(list)):
-            keyValue = list[x]
-            if len(keyValue) > 1:
-                key = keyValue[0].split('\"')[1]
-                value = keyValue[1][1:]
-                keys.append(key)
-                values.append(value)
+        file = codecs.open(path, mode='r', encoding='utf-8')
+        while True:
+            lines = file.readlines(sizehint=1000)
+            if not lines:
+                break
 
-        return (keys,values)
+            for line in lines:
+                retvalue = re.split(r'"[ ]*=[ ]*"', line, maxsplit=1)
+                if len(retvalue) > 1:
+                    keys.append(retvalue[0].lstrip()[1:])
+                    values.append(retvalue[1].rstrip().rstrip(' ;')[:-1])
+
+        return keys,values

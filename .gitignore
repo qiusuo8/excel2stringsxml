@@ -106,3 +106,4 @@ venv.bak/
 # current project
 */*.py[cod]
 .vscode/
+testexample/
