@@ -9,28 +9,32 @@ import re
 class iOSStringsHandler:
 
     @staticmethod
-    def writeToFile(keys,values,directory,additional):
+    def writeToFile(keys, baseValues, values, directory):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        Log.info("Creating iOS file:" + directory+"Localizable.strings")
-
-        fo = open(directory+"Language.strings", "wb")
+        stringsPath = os.path.join(directory, 'Language.strings')
+        Log.info("Creat iOS strings file:" + stringsPath)
+        filestream = open(stringsPath, "wb")
 
         for x in range(len(keys)):
-            if values[x] is None or values[x] == '':
-                Log.error("Key:" + keys[x] + "\'s value is None. Index:" + str(x + 1))
+            key = keys[x].strip()
+            if key is None or key == '':
                 continue
 
-            key = keys[x].strip()
-            value = values[x]
-            content = "\"" + key + "\" " + "= " + "\"" + value + "\";\n"
-            fo.write(content);
+            if key == Contant.KEY_DEV_COMMENT:
+                comment = baseValues[x].strip()
+                filestream.write('/*' + comment + '*/\n')
+                continue
 
-        if additional is not None:
-            fo.write(additional)
+            if values[x] is None or values[x] == '':
+                # Log.error("Key:" + keys[x] + "\'s value is None. Index:" + str(x))
+                continue
 
-        fo.close()
+            value = values[x].strip()
+            filestream.write('"' + key + '"' + ' = ' + '"' + value + '";\n')
+
+        filestream.close()
 
     @staticmethod
     def getKeyValueDictByPath(path):
@@ -79,6 +83,6 @@ class iOSStringsHandler:
                     result = re.split(r'/\*.+\*/\n', line, maxsplit=1)
                     if len(result) == 2:
                         keys.append(Contant.KEY_DEV_COMMENT)
-                        values.append(line.strip())
+                        values.append(line.strip().replace('/*', '').replace('*/', ''))
 
         return keys,values

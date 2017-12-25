@@ -32,33 +32,58 @@ def _stringElementKeyValue(elementNode):
     return (key, value), True
 
 class AndroidXmlHandler:
+    
     @staticmethod
-    def writeToFile(keys, values,directory,additional):
+    def writeToFile(keys, baseValues, values, directory, isBase):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        Log.info("Creating android file:" + directory + "/strings.xml")
+        xmlPath = os.path.join(directory, 'strings.xml')
+        Log.info("Create android xml file:" + xmlPath)
 
-        fo = open(directory + "/strings.xml", "wb")
-
-        stringEncoding = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n"
-        fo.write(stringEncoding)
+        doc = minidom.Document()
+        resourcesNode = doc.createElement('resources')
+        if isBase:
+            resourcesNode.setAttribute('xmlns:tools', 'http://schemas.android.com/tools')
+            resourcesNode.setAttribute('tools:ignore', 'MissingTranslation')
+        doc.appendChild(resourcesNode)
 
         for x in range(len(keys)):
-            if values[x] is None or values[x] == '' :
-                Log.error("Key:" + keys[x] + "\'s value is None. Index:" + str(x + 1))
+            key = keys[x]
+            if key is None or key == '':
+                continue
+            key = keys[x].strip()
+
+            if key == Contant.KEY_DEV_COMMENT:
+                comment = doc.createComment(baseValues[x].strip().decode('utf-8'))
+                resourcesNode.appendChild(comment)
                 continue
 
-            key = keys[x].strip()
-            value = re.sub(r'(%\d\$)(@)', r'\1s', values[x])
-            content = "   <string name=\"" + key + "\">" + value + "</string>\n"
-            fo.write(content)
+            if values[x] is None or values[x].strip() == '':
+                # Log.error("Key:" + keys[x] + "\'s value is None. Index:" + str(x))
+                continue
 
-        if additional is not None:
-            fo.write(additional)
+            stringEle = doc.createElement('string')
+            stringEle.setAttribute('name', key)
+            resourcesNode.appendChild(stringEle)    
+            textNodeParent = stringEle   
 
-        fo.write("</resources>")
-        fo.close()
+            value = values[x].strip()
+            result = re.split(Contant.ELEMENT_TAG_DEVIDER, value, maxsplit=1)
+            if len(result) == 2 and result[0] == 'u':
+                print(key, ':', value, 'has', Contant.ELEMENT_TAG_DEVIDER)
+                value = result[1]
+                uEle = doc.createElement('u')
+                stringEle.appendChild(uEle)
+                textNodeParent = uEle
+
+            value = re.sub(r'(%\d\$)(@)', r'\1s', value)
+            textNode = doc.createTextNode(value.decode('utf-8'))
+            textNodeParent.appendChild(textNode)
+
+        filestream = open(xmlPath, "wb")
+        filestream.write(doc.toprettyxml(encoding='utf-8'))
+        filestream.close()
 
     @staticmethod
     def getKeyValueDictByPath(path):

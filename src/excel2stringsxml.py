@@ -6,72 +6,67 @@ from ExcelReader import ExcelReader
 from AndroidXmlHandler import AndroidXmlHandler
 from iOSStringsHandler import iOSStringsHandler
 from constants import Log
+import os
 
-def addParser():
+def _addParser():
     parser = OptionParser()
-    parser.add_option("-f", "--filePath",
-                      help="original.xls File Path.",
-                      metavar="filePath")
-    parser.add_option("-t", "--targetFloderPath",
-                      help="Target Floder Path.",
-                      metavar="targetFloderPath")
-    parser.add_option("-i", "--iOSAdditional",
-                      help="iOS additional info.",
-                      metavar = "iOSAdditional")
-    parser.add_option("-a", "--androidAdditional",
-                      help="android additional info.",
-                      metavar="androidAdditional")
+    parser.add_option("-x", "--xls",
+                      dest="xls",
+                      default="",
+                      help="xls file path",
+                      metavar="xls")
+    parser.add_option("-s", "--targetFolder",
+                      dest="targetFolder",
+                      default="",
+                      help="generate strings and xml in this folder",
+                      metavar="targetFolder")
     (options, args) = parser.parse_args()
     Log.info("options: %s, args: %s" % (options, args))
     return options
 
-
-def startConvert(filePath, targetFloderPath, iOSAdditional, androidAdditional):
-    if filePath is not None:
-        if targetFloderPath is None:
-            Log.error("targetFloderPath is None！use -h for help.")
+def startConvert(xlsPath, targetFolder):
+    if xlsPath is not None:
+        if targetFolder is None:
+            Log.error("targetFolder is None！use -h for help.")
             return
 
-        # xls
-        Log.info("read xls file from"+filePath)
-        reader = ExcelReader(filePath)
-
-        # iOS & Android
+        Log.info("read xls file from" + xlsPath)
+        reader = ExcelReader(xlsPath)
         table = reader.getTableByIndex(0)
-        convertiOSAndAndroidFile(table,targetFloderPath,iOSAdditional,androidAdditional)
-
-        Log.info("Finished,go to see it -> "+targetFloderPath)
-
+        convertExcelTableToStringsXml(table, targetFolder)
+        Log.info("Finished,go to see it -> " + targetFolder)
     else:
         Log.error("file path is None！use -h for help.")
 
+def convertExcelTableToStringsXml(table, targetFolder):
+    countryCodeList = table.row_values(0)
 
-def convertiOSAndAndroidFile(table,targetFloderPath,iOSAdditional,androidAdditional):
-    firstRow = table.row_values(0)
+    keyNameList = table.col_values(0)
+    del keyNameList[0]
 
-    keys = table.col_values(0)
-    del keys[0]
+    baseIndex = countryCodeList.index('en')
+    baseValueList = table.col_values(baseIndex)
+    del baseValueList[0]
 
-    for index in range(len(firstRow)):
-        if index > 0:
-            languageName = firstRow[index]
-            values = table.col_values(index)
-            del values[0]
-            # iOS
-            iOSStringsHandler.writeToFile(keys,values,targetFloderPath + "/ios/"+languageName+".lproj/",iOSAdditional)
+    for i in range(1, len(countryCodeList)):
+        countryCode = countryCodeList[i]
+        values = table.col_values(i)
+        del values[0]
+        # iOS
+        iOSStringsHandler.writeToFile(keyNameList, baseValueList, values, os.path.join(targetFolder, 'ios', countryCode + '.lproj'))
 
-            # Android
-            if languageName == "zh-Hans":
-                languageName = "zh-rCN"
-
-            path = targetFloderPath + "/android/values-"+languageName+"/"
-            if languageName == 'en':
-                path = targetFloderPath + "/android/values/"
-            AndroidXmlHandler.writeToFile(keys,values,path,androidAdditional)
+        #Android
+        if countryCode == "zh-Hans":
+            countryCode = "zh-rCN"
+        countryCodeFolder = 'values-' + countryCode
+        if countryCode == 'en':
+            countryCodeFolder = 'values'
+        path = os.path.join(targetFolder, 'android', countryCodeFolder)
+        AndroidXmlHandler.writeToFile(keyNameList, baseValueList, values, path, countryCode == 'en')
 
 def main():
-    options = addParser()
-    startConvert(options.filePath, options.targetFloderPath, options.iOSAdditional, options.androidAdditional)
+    options = _addParser()
+    startConvert(options.xls, options.targetFolder)
 
 if __name__=='__main__':
     main()

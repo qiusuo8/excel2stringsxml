@@ -5,7 +5,7 @@ import os
 
 class Contant:
     KEY_DEV_COMMENT = 'dev_comment'
-    ELEMENT_TAG_DEVIDER = '@#$&'
+    ELEMENT_TAG_DEVIDER = '@##@'
 
 class Log:
     'Log util'
