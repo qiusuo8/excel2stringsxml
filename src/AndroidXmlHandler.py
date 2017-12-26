@@ -14,7 +14,9 @@ def _elementKeyValue(elementNode):
     value = ''
     for node in elementNode.childNodes:
         if node.nodeType == Node.TEXT_NODE:
-            value = node.nodeValue.strip()
+            v = node.nodeValue.strip()
+            if v != None and v != '':
+                value = v
         elif node.nodeType == Node.ELEMENT_NODE:
             k, v = _elementKeyValue(node)
             value = node.nodeName + Contant.ELEMENT_TAG_DEVIDER + v
