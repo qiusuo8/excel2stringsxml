@@ -19,14 +19,13 @@ def _addParser():
                       help="strings file path",
                       metavar="stringspath")
     (options, args) = parser.parse_args()
-    Log.info("options: %s, args: %s" % (options, args))
     return options
 
 def parseXMLToCheckKeyUniqueAt(filepath):
     if filepath is None or filepath == '':
-        print('filepath is empty')
+        Log.error('filepath is empty')
         return
-    Log.info('parse %s' % filepath)
+    Log.info('parsing %s' % filepath)
 
     doc = minidom.parse(filepath)
     root = doc.documentElement
@@ -48,7 +47,7 @@ def parseStringsToCheckKeyUniqueAt(filepath):
     if filepath is None:
         Log.error('file path is None')
         return
-    Log.info('parse %s' % filepath)
+    Log.info('parsing %s' % filepath)
 
     keyDict = {}
     file = codecs.open(filepath, mode='r', encoding='utf-8')

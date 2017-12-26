@@ -21,7 +21,6 @@ def _addParser():
                       help="generate strings and xml in this folder",
                       metavar="targetFolder")
     (options, args) = parser.parse_args()
-    Log.info("options: %s, args: %s" % (options, args))
     return options
 
 def startConvert(xlsPath, targetFolder):

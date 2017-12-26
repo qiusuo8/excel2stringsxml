@@ -41,7 +41,7 @@ class AndroidXmlHandler:
             os.makedirs(directory)
 
         xmlPath = os.path.join(directory, 'strings.xml')
-        Log.info("Create android xml file:" + xmlPath)
+        Log.info("Creating android xml file:" + xmlPath)
 
         doc = minidom.Document()
         resourcesNode = doc.createElement('resources')
@@ -73,7 +73,6 @@ class AndroidXmlHandler:
             value = values[x].strip()
             result = re.split(Contant.ELEMENT_TAG_DEVIDER, value, maxsplit=1)
             if len(result) == 2 and result[0] == 'u':
-                print(key, ':', value, 'has', Contant.ELEMENT_TAG_DEVIDER)
                 value = result[1]
                 uEle = doc.createElement('u')
                 stringEle.appendChild(uEle)

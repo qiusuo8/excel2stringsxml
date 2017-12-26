@@ -14,7 +14,7 @@ class iOSStringsHandler:
             os.makedirs(directory)
 
         stringsPath = os.path.join(directory, 'Language.strings')
-        Log.info("Creat iOS strings file:" + stringsPath)
+        Log.info("Creating iOS strings file:" + stringsPath)
         filestream = open(stringsPath, "wb")
 
         for x in range(len(keys)):
